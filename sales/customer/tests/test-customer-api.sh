@@ -13,7 +13,7 @@ for i in {1..10}; do
   echo "Sending request #$i..."
 
   # Send HTTP GET request and capture the HTTP status code
-  STATUS=$(curl -o /dev/null -s -w "%{http_code}" -H "apikey:$API_KEY" "$ENDPOINT")
+  STATUS=$(curl -o /dev/null -sS -w "%{http_code}" -H "apikey:$API_KEY" "$ENDPOINT")
 
   # Check if the status code is 200
   if [ "$STATUS" -eq 200 ]; then
