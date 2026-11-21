@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the endpoint URL
-ENDPOINT="http://a333b823baeb643e0a84e2b21d2db9d2-1564981458.eu-west-2.elb.amazonaws.com/customer"  
+ENDPOINT="http://localhost:8000"  
 API_KEY="jdoe-key"
 
 # Initialize counters for successes and failures
