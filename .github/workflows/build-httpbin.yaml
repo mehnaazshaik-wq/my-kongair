@@ -26,3 +26,13 @@ jobs:
             --output-file "$RUNNER_TEMP/httpbin-kong.yaml"
           deck file validate "$RUNNER_TEMP/httpbin-kong.yaml"
           cat "$RUNNER_TEMP/httpbin-kong.yaml"
+
+      - name: Generate and validate Kong configuration
+        if: ${{ github.ref == 'refs/heads/feat/httpbin' && vars.HTTPBIN_SANDBOX_CP != '' }}
+        env:
+          DECK_KONNECT_CONTROL_PLANE_NAME: ${{ vars.HTTPBIN_SANDBOX_CP }}
+          DECK_KONNECT_TOKEN: ${{ secrets.KONNECT_PAT }}
+          DECK_KONNECT_ADDR: ${{ vars.KONNECT_ADDR }}
+        run: |
+          deck gateway ping
+          deck gateway apply "$RUNNER_TEMP/httpbin-kong.yaml"
