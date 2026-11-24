@@ -1,0 +1,30 @@
+openapi: 3.0.3
+info:
+  title: Petstore Sandbox
+  version: 1.0.0
+servers:
+  - url: https://petstore3.swagger.io
+paths:
+  /api/v3/pet/findByStatus:
+    get:
+      operationId: findSandboxPetsByStatus
+      summary: Find pets by availability
+      parameters:
+        - name: status
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [available, pending, sold]
+      responses:
+        '200':
+          description: Matching pets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    status:
+                      type: string
