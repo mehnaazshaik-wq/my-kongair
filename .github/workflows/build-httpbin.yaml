@@ -1,0 +1,28 @@
+name: Build HTTPBin API
+
+on:
+  push:
+    branches:
+      - feat/httpbin
+    paths:
+      - demo/httpbin/openapi.yaml
+      - .github/workflows/build-httpbin.yaml
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up decK
+        uses: kong/setup-deck@v1
+        with:
+          deck-version: '1.40.3'
+          wrapper: false
+
+      - name: Generate and validate Kong configuration
+        run: |
+          deck file openapi2kong --spec demo/httpbin/openapi.yaml \
+            --output-file "$RUNNER_TEMP/httpbin-kong.yaml"
+          deck file validate "$RUNNER_TEMP/httpbin-kong.yaml"
+          cat "$RUNNER_TEMP/httpbin-kong.yaml"
