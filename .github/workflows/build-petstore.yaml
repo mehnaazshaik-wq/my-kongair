@@ -1,0 +1,54 @@
+name: Deploy Petstore API
+
+on:
+  push:
+    branches:
+      - feat/petstore
+    paths:
+      - demo/petstore/openapi.yaml
+      - .github/workflows/build-petstore.yaml
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up decK
+        uses: kong/setup-deck@v1
+        with:
+          deck-version: '1.69.0'
+          wrapper: false
+
+      - name: Generate and validate Petstore configuration
+        run: |
+          deck file openapi2kong \
+            --spec demo/petstore/openapi.yaml \
+            --output-file "$RUNNER_TEMP/petstore.yaml"
+          deck file validate "$RUNNER_TEMP/petstore.yaml"
+
+      - name: Deploy to sandbox
+        env:
+          DECK_KONNECT_CONTROL_PLANE_NAME: ${{ vars.HTTPBIN_SANDBOX_CP }}
+          DECK_KONNECT_ADDR: ${{ vars.KONNECT_ADDR }}
+          DECK_KONNECT_TOKEN: ${{ secrets.KONNECT_PAT }}
+        run: |
+          : "${DECK_KONNECT_CONTROL_PLANE_NAME:?Missing sandbox control plane}"
+          : "${DECK_KONNECT_ADDR:?Missing Konnect address}"
+          : "${DECK_KONNECT_TOKEN:?Missing Konnect token}"
+          deck gateway ping
+          deck gateway apply "$RUNNER_TEMP/petstore.yaml"
+
+      - name: Verify Petstore through the gateway
+        run: |
+          curl --fail --silent --show-error \
+            --retry 4 --retry-all-errors --retry-delay 3 --max-time 20 \
+            -H 'Accept: application/json' \
+            'https://10f31a9f03.us.serverless.gateways.konggateway.com/api/v3/pet/findByStatus?status=available' \
+            -o "$RUNNER_TEMP/pets.json"
+          jq -e 'type == "array" and all(.[]; .status == "available")' \
+            "$RUNNER_TEMP/pets.json"
