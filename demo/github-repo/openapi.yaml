@@ -1,0 +1,22 @@
+openapi: 3.0.3
+info:
+  title: GitHub Repository Demo
+  version: 1.0.0
+servers:
+  - url: https://api.github.com
+paths:
+  /repos/Kong/deck:
+    get:
+      operationId: getKongDeckRepository
+      summary: Get information about the Kong decK repository
+      responses:
+        '200':
+          description: Public repository information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  full_name:
+                    type: string
+                    example: Kong/deck
