@@ -1,0 +1,14 @@
+openapi: 3.0.3
+info:
+  title: HTTPBin Demo
+  version: 1.0.0
+servers:
+  - url: https://httpbin.konghq.com
+paths:
+  /get:
+    get:
+      operationId: get-httpbin-demo
+      summary: Echo request query parameters
+      responses:
+        '200':
+          description: Request details returned as JSON
