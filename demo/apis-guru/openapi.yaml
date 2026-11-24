@@ -1,0 +1,23 @@
+openapi: 3.0.3
+info:
+  title: APIs Guru Metrics
+  version: 1.0.0
+servers:
+  - url: https://api.apis.guru
+paths:
+  /v2/metrics.json:
+    get:
+      operationId: getApisGuruMetrics
+      summary: Get API directory metrics
+      responses:
+        '200':
+          description: API directory metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  numAPIs:
+                    type: integer
+                  numSpecs:
+                    type: integer
