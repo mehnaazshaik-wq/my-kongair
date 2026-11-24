@@ -1,0 +1,40 @@
+name: Build APIs Guru API
+
+on:
+  push:
+    branches:
+      - feat/apis-guru
+    paths:
+      - demo/apis-guru/openapi.yaml
+      - .github/workflows/build-apis-guru.yaml
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up decK
+        uses: kong/setup-deck@v1
+        with:
+          deck-version: '1.69.0'
+          wrapper: false
+
+      - name: Generate and validate the APIs.guru configuration
+        run: |
+          deck file openapi2kong --spec demo/apis-guru/openapi.yaml \
+            --output-file "$RUNNER_TEMP/apis-guru-kong.yaml"
+          deck file validate "$RUNNER_TEMP/apis-guru-kong.yaml"
+
+      - name: Deploy APIs.guru to the sandbox
+        env:
+          DECK_KONNECT_CONTROL_PLANE_NAME: ${{ vars.HTTPBIN_SANDBOX_CP }}
+          DECK_KONNECT_ADDR: ${{ vars.KONNECT_ADDR }}
+          DECK_KONNECT_TOKEN: ${{ secrets.KONNECT_PAT }}
+        run: |
+          : "${DECK_KONNECT_CONTROL_PLANE_NAME:?Set HTTPBIN_SANDBOX_CP}"
+          deck gateway ping
+          deck gateway apply "$RUNNER_TEMP/apis-guru-kong.yaml"
