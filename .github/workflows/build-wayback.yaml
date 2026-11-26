@@ -1,0 +1,39 @@
+name: Build Wayback API
+
+on:
+  push:
+    branches:
+      - feat/wayback
+    paths:
+      - demo/wayback/openapi.yaml
+      - .github/workflows/build-wayback.yaml
+
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up decK
+        uses: kong/setup-deck@v1
+        with:
+          deck-version: '1.69.0'
+          wrapper: false
+
+      - name: Generate and validate the Wayback configuration
+        run: |
+          deck file openapi2kong --spec demo/wayback/openapi.yaml --output-file kong-wayback.yaml
+          deck file validate kong-wayback.yaml
+
+      - name: Deploy Wayback to the sandbox
+        env:
+          KONNECT_PAT: ${{ secrets.KONNECT_PAT }}
+          KONNECT_ADDR: ${{ vars.KONNECT_ADDR }}
+          KONNECT_CP: ${{ vars.HTTPBIN_SANDBOX_CP }}
+        run: |
+          deck gateway ping --konnect-addr "$KONNECT_ADDR" --konnect-control-plane-name "$KONNECT_CP" --konnect-token "$KONNECT_PAT"
+          deck gateway apply kong-wayback.yaml --konnect-addr "$KONNECT_ADDR" --konnect-control-plane-name "$KONNECT_CP" --konnect-token "$KONNECT_PAT"
