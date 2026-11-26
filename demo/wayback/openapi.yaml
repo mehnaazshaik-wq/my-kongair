@@ -7,10 +7,7 @@ servers:
 paths:
   /wayback/available:
     get:
-      operationId: getWaybackAvailability
-      summary: Check for an archived snapshot
-          get:
-      operationId: getWaybackAvailability
+    operationId: getWaybackAvailability
       summary: Check for an archived snapshot
       x-kong-plugin-rate-limiting:
         enabled: true
